@@ -16,9 +16,11 @@ app.post('/', function(request, res){ //take post request on "/"
     Comment = Comment.replace(/(\r\n|\n|\r)/gm,"");
   } else {
       for (var i=0; i<request.body.build.teamcityProperties.length; i++){
-        if(request.body.build.teamcityProperties[i].name == "build.vcs.number") {
+        if(request.body.build.teamcityProperties[i].name.includes("build.vcs.number")) {
+          console.log('Find inclueds')
           Commit = request.body.build.teamcityProperties[i].value;
           Comment = 'undefined';
+          break;
             }
            }
          }
@@ -37,12 +39,13 @@ and set Comment variable as undefined */
        .on('response',function(response) {
          console.info("Metric: "+request.body.build.projectId+'{TriggeredBy="'+request.body.build.triggeredBy+'" , BuildResult="'+request.body.build.buildResult+'" , NotifyType="'+request.body.build.notifyType+'" , BuildResultDelta="'+request.body.build.buildResultDelta+'" , BuildId="'+request.body.build.buildNumber+'" , Commit="'+Commit+'" , Comment="'+Comment+'" }'+request.body.build.buildNumber+' was send to address: '+pgaddress+'/metrics/job/'+request.body.build.buildName+'/instance/'+request.body.build.projectName);
          console.log('Remote server response code: '+response.statusCode);
+         Commit = null;
+         Comment = null;
        })
        .on('error', function(error) {
          console.error(error.message)
          });
 /*Send post request to prometheus pushgateway with variable from json Web Hook*/
-
   res.sendStatus(200); // echo the result back
 
 });
